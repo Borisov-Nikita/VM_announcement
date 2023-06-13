@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="initial_rating_range_slider">
+        <item>0</item>
+        <item>23</item>
+    </array>
+</resources>

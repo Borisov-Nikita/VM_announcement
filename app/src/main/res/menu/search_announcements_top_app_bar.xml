@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/display_settings_menu_item"
+        android:icon="@drawable/ic_display_settings_24"
+        android:title="@string/display_settings"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/save_report_menu_item"
+        android:icon="@drawable/ic_save_as_24"
+        android:title="@string/save_announcements_report"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/send_announcements_menu_item"
+        android:icon="@drawable/ic_send_24"
+        android:title="@string/send_announcements"
+        app:showAsAction="ifRoom" />
+</menu>
