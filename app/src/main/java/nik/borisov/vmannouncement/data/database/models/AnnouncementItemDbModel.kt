@@ -35,5 +35,4 @@ data class AnnouncementItemDbModel(
     val secondTeam: String,
     @ColumnInfo(name = "announcement_text")
     val announcementText: String
-
 )

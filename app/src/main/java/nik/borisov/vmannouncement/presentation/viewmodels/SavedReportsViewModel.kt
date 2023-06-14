@@ -7,14 +7,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import nik.borisov.vmannouncement.data.RepositoryImpl
 import nik.borisov.vmannouncement.domain.entities.AnnouncementsReportItem
-import nik.borisov.vmannouncement.domain.usecases.DeleteAnnouncementReportUseCase
+import nik.borisov.vmannouncement.domain.usecases.DeleteAnnouncementsReportUseCase
 import nik.borisov.vmannouncement.domain.usecases.GetAnnouncementReportUseCase
 
 class SavedReportsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = RepositoryImpl(application)
     private val getAnnouncementReportUseCase = GetAnnouncementReportUseCase(repository)
-    private val deleteAnnouncementReportUseCase = DeleteAnnouncementReportUseCase(repository)
+    private val deleteAnnouncementsReportUseCase = DeleteAnnouncementsReportUseCase(repository)
 
     fun getAnnouncementReports(): LiveData<List<AnnouncementsReportItem>> {
         return getAnnouncementReportUseCase.getAnnouncementsReport()
@@ -22,7 +22,7 @@ class SavedReportsViewModel(application: Application) : AndroidViewModel(applica
 
     fun deleteAnnouncementReport(reportId: Long) {
         viewModelScope.launch {
-            deleteAnnouncementReportUseCase.deleteAnnouncementsReport(reportId)
+            deleteAnnouncementsReportUseCase.deleteAnnouncementsReport(reportId)
         }
     }
 }

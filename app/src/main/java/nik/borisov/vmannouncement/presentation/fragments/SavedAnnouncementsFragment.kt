@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentSavedAnnouncementsBinding
-import nik.borisov.vmannouncement.presentation.viewmodels.SavedAnnouncementsViewModel
 import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
+import nik.borisov.vmannouncement.presentation.viewmodels.SavedAnnouncementsViewModel
 
 class SavedAnnouncementsFragment : Fragment() {
 
@@ -54,7 +54,7 @@ class SavedAnnouncementsFragment : Fragment() {
             adapter.submitList(it)
         }
         viewModel.telegramBotError.observe(viewLifecycleOwner) {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, getString(R.string.bot_error), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -79,10 +79,9 @@ class SavedAnnouncementsFragment : Fragment() {
                     viewModel.sendAnnouncementsReport(adapter.currentList)
                     Toast.makeText(
                         requireContext(),
-                        "Announcements report message sent.",
+                        getString(R.string.message_sent),
                         Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
                     true
                 }
                 else -> false
@@ -124,7 +123,7 @@ class SavedAnnouncementsFragment : Fragment() {
 
     companion object {
 
-        private const val ARG_REPORT_ID = "arf_report_id"
+        private const val ARG_REPORT_ID = "arg_report_id"
 
         fun newInstance(announcementsReportId: Long) =
             SavedAnnouncementsFragment().apply {

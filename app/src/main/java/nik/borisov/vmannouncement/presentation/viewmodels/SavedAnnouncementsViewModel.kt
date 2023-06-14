@@ -26,8 +26,8 @@ class SavedAnnouncementsViewModel(application: Application) : AndroidViewModel(a
         SendTelegramMessageUseCase(repository)
     private val getTelegramBotUseCase = GetTelegramBotUseCase(repository)
 
-    private val _telegramBotError = MutableLiveData<String>()
-    val telegramBotError: LiveData<String>
+    private val _telegramBotError = MutableLiveData<Unit>()
+    val telegramBotError: LiveData<Unit>
         get() = _telegramBotError
 
     private var telegramBot: TelegramBot? = null
@@ -63,7 +63,7 @@ class SavedAnnouncementsViewModel(application: Application) : AndroidViewModel(a
                 )
             }
         } else {
-            _telegramBotError.value = "Telegram bot is not configured."
+            _telegramBotError.value = Unit
         }
     }
 

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentTelegramBotSettingsBinding
 import nik.borisov.vmannouncement.presentation.viewmodels.TelegramBotSettingsViewModel
 
@@ -46,7 +47,11 @@ class TelegramBotSettingsFragment : Fragment() {
             binding.chatIdEditText.setText(it.chatId)
         }
         viewModel.error.observe(viewLifecycleOwner) {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "${getString(R.string.bot_invalid)}\n$it",
+                Toast.LENGTH_LONG
+            ).show()
         }
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner) {
             finishFragment()

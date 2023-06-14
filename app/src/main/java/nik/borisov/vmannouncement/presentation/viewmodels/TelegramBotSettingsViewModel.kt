@@ -38,28 +38,13 @@ class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(
     }
 
     fun addTelegramBot(tokenInput: String, chatIdInput: String) {
-        val bot = parseInput(tokenInput, chatIdInput)
-        if (bot != null) {
-            viewModelScope.launch {
-                val isTelegramBotValid = isTelegramBotValid(bot)
-                if (isTelegramBotValid) {
-                    addTelegramBotUseCase.addTelegramBot(bot)
-                    _shouldCloseScreen.value = Unit
-                }
+        val bot = TelegramBot(tokenInput, chatIdInput)
+        viewModelScope.launch {
+            val isTelegramBotValid = isTelegramBotValid(bot)
+            if (isTelegramBotValid) {
+                addTelegramBotUseCase.addTelegramBot(bot)
+                _shouldCloseScreen.value = Unit
             }
-        } else {
-            _error.value = "Invalid chat id input"
-        }
-    }
-
-    private fun parseInput(tokenInput: String, chatIdInput: String): TelegramBot? {
-        return try {
-            TelegramBot(
-                token = tokenInput,
-                chatId = chatIdInput
-            )
-        } catch (e: Exception) {
-            null
         }
     }
 
@@ -71,14 +56,14 @@ class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(
         if (result is DataResult.Success) {
             isValid = true
         } else {
-            _error.value = "Something went wrong:\n${result.message}"
+            _error.value = "${result.message}"
         }
         return isValid
     }
 
     private fun getTelegramBot() {
         viewModelScope.launch {
-             _bot.value = getTelegramBotUseCase.getTelegramBot()
+            _bot.value = getTelegramBotUseCase.getTelegramBot()
         }
     }
 }

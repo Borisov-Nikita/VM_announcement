@@ -12,15 +12,15 @@ import nik.borisov.vmannouncement.domain.entities.AnnouncementsReportItem
 import nik.borisov.vmannouncement.domain.entities.MessageItem
 import nik.borisov.vmannouncement.domain.entities.TelegramBot
 import nik.borisov.vmannouncement.domain.usecases.*
-import nik.borisov.vmannouncement.presentation.DateForAnnouncements
-import nik.borisov.vmannouncement.presentation.SearchAnnouncementSettings
+import nik.borisov.vmannouncement.utils.DateForAnnouncements
+import nik.borisov.vmannouncement.utils.SearchAnnouncementSettings
 import nik.borisov.vmannouncement.utils.DataResult
 import nik.borisov.vmannouncement.utils.TelegramBotHelper
-import java.text.SimpleDateFormat
+import nik.borisov.vmannouncement.utils.TimeConverter
 import java.time.*
-import java.util.*
 
-class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(application), TelegramBotHelper {
+class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(application),
+    TelegramBotHelper, TimeConverter {
 
     private val repository = RepositoryImpl(application)
     private val downloadAnnouncementsUseCase = DownloadAnnouncementsUseCase(repository)
@@ -39,8 +39,8 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
     val line: LiveData<DataResult<String>>
         get() = _line
 
-    private val _telegramBotError = MutableLiveData<String>()
-    val telegramBotError: LiveData<String>
+    private val _telegramBotError = MutableLiveData<Unit>()
+    val telegramBotError: LiveData<Unit>
         get() = _telegramBotError
 
     private val announcementList = mutableListOf<AnnouncementItem>()
@@ -57,8 +57,7 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
 
     fun getLine(firstTeam: String, secondTeam: String, time: Long) {
         viewModelScope.launch {
-            val result = downloadLineUseCase.downloadLine(firstTeam, secondTeam, time)
-            _line.value = result
+            _line.value = downloadLineUseCase.downloadLine(firstTeam, secondTeam, time)
         }
     }
 
@@ -120,7 +119,7 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
                 }
             }
         } else {
-            _telegramBotError.value = "Telegram bot is not configured."
+            _telegramBotError.value = Unit
         }
     }
 
@@ -185,16 +184,10 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
     }
 
     private fun parseReportInfo(timeFrom: Long, timeTo: Long): String {
-        val formatterDate = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
-        val formatterTime = SimpleDateFormat("HH:mm", Locale.ENGLISH)
-        formatterDate.timeZone = TimeZone.getTimeZone("Europe/Moscow")
-        formatterTime.timeZone = TimeZone.getTimeZone("Europe/Moscow")
-        return "${
-            formatterDate.format(Date(timeFrom))
-        }\n${
-            formatterTime.format(Date(timeFrom))
-        } - ${
-            formatterTime.format(Date(timeTo))
-        }"
+        return buildString {
+            append(convertTimeDateFromMillisToString(timeFrom, "dd MMM yyyy"), "\n")
+            append(convertTimeDateFromMillisToString(timeFrom, "HH:mm"), " - ")
+            append(convertTimeDateFromMillisToString(timeTo, "HH:mm"))
+        }
     }
 }

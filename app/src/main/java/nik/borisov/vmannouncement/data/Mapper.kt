@@ -9,10 +9,9 @@ import nik.borisov.vmannouncement.data.network.models.PathDto
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
 import nik.borisov.vmannouncement.domain.entities.AnnouncementsReportItem
 import nik.borisov.vmannouncement.domain.entities.TelegramBot
-import java.text.SimpleDateFormat
-import java.util.*
+import nik.borisov.vmannouncement.utils.TimeConverter
 
-class Mapper {
+class Mapper : TimeConverter {
 
     fun mapAnnouncementDtoToEntity(
         dto: AnnouncementDto
@@ -32,7 +31,12 @@ class Mapper {
     }
 
     fun mapLineDtoToString(dto: LineDto): String {
-        return "${convertTime(dto.time * 1000)}\n${dto.sport}. ${dto.firstTeamName} vs ${dto.secondTeamName}\n${dto.league}"
+        return getAnnouncementText(
+            dto.sport,
+            dto.league,
+            dto.time * 1000,
+            "${dto.firstTeamName} vs ${dto.secondTeamName}"
+        )
     }
 
     fun mapAnnouncementsReportDbModelToEntity(dbModel: AnnouncementsReportDbModel): AnnouncementsReportItem {
@@ -112,12 +116,11 @@ class Mapper {
         time: Long,
         teamNames: String
     ): String {
-        return "${convertTime(time)}\n$sport. $teamNames\n$league"
-    }
-
-    private fun convertTime(time: Long): String {
-        val formatter = SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH)
-        formatter.timeZone = TimeZone.getTimeZone("Europe/Moscow")
-        return formatter.format(Date(time))
+        return buildString {
+            append(convertTimeDateFromMillisToString(time, "dd MMM HH:mm"), "\n")
+            append(sport, ". ")
+            append(teamNames, "\n")
+            append(league)
+        }
     }
 }
