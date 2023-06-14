@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,6 +16,10 @@ import nik.borisov.vmannouncement.databinding.DisplaySettingsBottomSheetBinding
 import nik.borisov.vmannouncement.databinding.FragmentSearchAnnouncementsBinding
 import nik.borisov.vmannouncement.databinding.LineTextBottomSheetBinding
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
+import nik.borisov.vmannouncement.presentation.DateForAnnouncements
+import nik.borisov.vmannouncement.presentation.SearchAnnouncementSettings
+import nik.borisov.vmannouncement.presentation.viewmodels.SearchAnnouncementsViewModel
+import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
 import nik.borisov.vmannouncement.utils.DataResult
 
 class SearchAnnouncementsFragment : Fragment() {

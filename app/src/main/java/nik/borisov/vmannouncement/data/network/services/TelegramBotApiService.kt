@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.data.network
+package nik.borisov.vmannouncement.data.network.services
 
 import nik.borisov.vmannouncement.data.network.models.TelegramResponse
 import retrofit2.Response

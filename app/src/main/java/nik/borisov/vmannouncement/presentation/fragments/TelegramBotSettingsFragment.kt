@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import nik.borisov.vmannouncement.databinding.FragmentTelegramBotSettingsBinding
+import nik.borisov.vmannouncement.presentation.viewmodels.TelegramBotSettingsViewModel
 
 class TelegramBotSettingsFragment : Fragment() {
 

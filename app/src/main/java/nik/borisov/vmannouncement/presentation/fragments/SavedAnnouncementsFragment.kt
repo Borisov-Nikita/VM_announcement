@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentSavedAnnouncementsBinding
+import nik.borisov.vmannouncement.presentation.viewmodels.SavedAnnouncementsViewModel
+import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
 
 class SavedAnnouncementsFragment : Fragment() {
 

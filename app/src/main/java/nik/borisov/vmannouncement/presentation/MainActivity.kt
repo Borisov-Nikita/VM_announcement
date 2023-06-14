@@ -6,6 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.ActivityMainBinding
+import nik.borisov.vmannouncement.presentation.fragments.SavedReportsFragment
+import nik.borisov.vmannouncement.presentation.fragments.SearchAnnouncementsFragment
+import nik.borisov.vmannouncement.presentation.fragments.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
 

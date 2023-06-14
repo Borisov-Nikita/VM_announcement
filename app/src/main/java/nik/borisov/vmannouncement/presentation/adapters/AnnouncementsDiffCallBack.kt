@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.adapters
 
 import androidx.recyclerview.widget.DiffUtil
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem

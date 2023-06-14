@@ -1,5 +1,8 @@
 package nik.borisov.vmannouncement.data.network
 
+import nik.borisov.vmannouncement.data.network.services.MarathonBetApiService
+import nik.borisov.vmannouncement.data.network.services.OneXStavkaApiService
+import nik.borisov.vmannouncement.data.network.services.TelegramBotApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

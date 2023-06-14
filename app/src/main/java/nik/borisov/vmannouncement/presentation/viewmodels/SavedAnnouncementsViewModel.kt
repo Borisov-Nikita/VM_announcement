@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

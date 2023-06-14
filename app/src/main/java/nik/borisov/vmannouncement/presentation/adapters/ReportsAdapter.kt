@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

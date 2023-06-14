@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.presentation.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
