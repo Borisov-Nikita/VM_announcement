@@ -12,7 +12,12 @@ import nik.borisov.vmannouncement.domain.entities.TelegramBot
 import nik.borisov.vmannouncement.domain.usecases.AddTelegramBotUseCase
 import nik.borisov.vmannouncement.domain.usecases.GetTelegramBotUseCase
 import nik.borisov.vmannouncement.domain.usecases.SendTelegramMessageUseCase
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Bot
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Error
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Finish
+import nik.borisov.vmannouncement.presentation.viewmodels.states.TelegramBotSettingsState
 import nik.borisov.vmannouncement.utils.DataResult
+
 
 class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -21,17 +26,9 @@ class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(
     private val addTelegramBotUseCase = AddTelegramBotUseCase(repository)
     private val sendTelegramMessageUseCase = SendTelegramMessageUseCase(repository)
 
-    private val _bot = MutableLiveData<TelegramBot>()
-    val bot: LiveData<TelegramBot>
-        get() = _bot
-
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String>
-        get() = _error
-
-    private val _shouldCloseScreen = MutableLiveData<Unit>()
-    val shouldCloseScreen: LiveData<Unit>
-        get() = _shouldCloseScreen
+    private val _state = MutableLiveData<TelegramBotSettingsState>()
+    val state: LiveData<TelegramBotSettingsState>
+        get() = _state
 
     init {
         getTelegramBot()
@@ -43,7 +40,7 @@ class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(
             val isTelegramBotValid = isTelegramBotValid(bot)
             if (isTelegramBotValid) {
                 addTelegramBotUseCase.addTelegramBot(bot)
-                _shouldCloseScreen.value = Unit
+                _state.value = Finish
             }
         }
     }
@@ -56,14 +53,15 @@ class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(
         if (result is DataResult.Success) {
             isValid = true
         } else {
-            _error.value = "${result.message}"
+            _state.value = Error("${result.message}")
         }
         return isValid
     }
 
     private fun getTelegramBot() {
         viewModelScope.launch {
-            _bot.value = getTelegramBotUseCase.getTelegramBot()
+            val bot = getTelegramBotUseCase.getTelegramBot()
+            if (bot != null) _state.value = Bot(bot)
         }
     }
 }

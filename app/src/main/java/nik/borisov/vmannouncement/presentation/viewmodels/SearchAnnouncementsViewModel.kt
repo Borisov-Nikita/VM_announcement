@@ -12,11 +12,11 @@ import nik.borisov.vmannouncement.domain.entities.AnnouncementsReportItem
 import nik.borisov.vmannouncement.domain.entities.MessageItem
 import nik.borisov.vmannouncement.domain.entities.TelegramBot
 import nik.borisov.vmannouncement.domain.usecases.*
-import nik.borisov.vmannouncement.utils.DateForAnnouncements
-import nik.borisov.vmannouncement.utils.SearchAnnouncementSettings
-import nik.borisov.vmannouncement.utils.DataResult
-import nik.borisov.vmannouncement.utils.TelegramBotHelper
-import nik.borisov.vmannouncement.utils.TimeConverter
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Announcements
+import nik.borisov.vmannouncement.presentation.viewmodels.states.AnnouncementsState
+import nik.borisov.vmannouncement.presentation.viewmodels.states.BotError
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Line
+import nik.borisov.vmannouncement.utils.*
 import java.time.*
 
 class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(application),
@@ -31,19 +31,12 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
         SendTelegramMessageUseCase(repository)
     private val getTelegramBotUseCase = GetTelegramBotUseCase(repository)
 
-    private val _announcements = MutableLiveData<List<AnnouncementItem>>()
-    val announcements: LiveData<List<AnnouncementItem>>
-        get() = _announcements
+    private val _state = MutableLiveData<AnnouncementsState>()
+    val state: LiveData<AnnouncementsState>
+        get() = _state
 
-    private val _line = MutableLiveData<DataResult<String>>()
-    val line: LiveData<DataResult<String>>
-        get() = _line
-
-    private val _telegramBotError = MutableLiveData<Unit>()
-    val telegramBotError: LiveData<Unit>
-        get() = _telegramBotError
-
-    private val announcementList = mutableListOf<AnnouncementItem>()
+    private val commonAnnouncementList = mutableListOf<AnnouncementItem>()
+    private val visibleAnnouncementList = mutableListOf<AnnouncementItem>()
 
     private var searchAnnouncementSettings =
         SearchAnnouncementSettings(DateForAnnouncements.TODAY, 0, 23)
@@ -57,7 +50,7 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
 
     fun getLine(firstTeam: String, secondTeam: String, time: Long) {
         viewModelScope.launch {
-            _line.value = downloadLineUseCase.downloadLine(firstTeam, secondTeam, time)
+            _state.value = Line(downloadLineUseCase.downloadLine(firstTeam, secondTeam, time))
         }
     }
 
@@ -75,24 +68,23 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
         }
     }
 
-    fun deleteAnnouncementItem(announcementItem: AnnouncementItem) {
-        announcementList.remove(announcementItem)
+    fun deleteAnnouncement(announcement: AnnouncementItem) {
+        commonAnnouncementList.remove(announcement)
         refreshAnnouncements()
     }
 
     fun saveAnnouncements() {
-        val announcementsValue = announcements.value
-        if (announcementsValue != null) {
+        if (visibleAnnouncementList.isNotEmpty()) {
             viewModelScope.launch {
                 val reportId = addAnnouncementReportUseCase.addAnnouncementsReport(
                     AnnouncementsReportItem(
                         info = parseReportInfo(
-                            announcementsValue[0].time,
-                            announcementsValue[announcementsValue.size - 1].time
+                            visibleAnnouncementList[0].time,
+                            visibleAnnouncementList[visibleAnnouncementList.size - 1].time
                         )
                     )
                 )
-                addAnnouncementsUseCase.addAnnouncement(announcementsValue.map {
+                addAnnouncementsUseCase.addAnnouncement(visibleAnnouncementList.map {
                     it.copy(reportId = reportId)
                 })
             }
@@ -101,25 +93,24 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
 
     fun sendAnnouncementsReport() {
         if (telegramBot != null) {
-            val announcementsValue = announcements.value
-            if (announcementsValue != null) {
+            if (visibleAnnouncementList.isNotEmpty()) {
                 viewModelScope.launch {
                     sendTelegramMessageUseCase.sendTelegramMessage(
                         MessageItem(
                             bot = telegramBot ?: return@launch,
-                            messageText = parseMessage(announcementsValue)
+                            messageText = parseMessage(visibleAnnouncementList)
                         )
                     )
                     sendTelegramMessageUseCase.sendTelegramMessage(
                         MessageItem(
                             bot = telegramBot ?: return@launch,
-                            messageText = parseShortAnnouncementsMessage(announcementsValue)
+                            messageText = parseShortAnnouncementsMessage(visibleAnnouncementList)
                         )
                     )
                 }
             }
         } else {
-            _telegramBotError.value = Unit
+            _state.value = BotError
         }
     }
 
@@ -130,9 +121,9 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
             )
             when (result) {
                 is DataResult.Success -> {
-                    announcementList.clear()
+                    commonAnnouncementList.clear()
                     if (result.data != null) {
-                        announcementList.addAll(result.data)
+                        commonAnnouncementList.addAll(result.data)
                     }
                     refreshAnnouncements()
                 }
@@ -151,9 +142,11 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
     private fun refreshAnnouncements() {
         val timeFromMilli = parseTimeFrom(searchAnnouncementSettings.timeFrom)
         val timeToMilli = parseTimeTo(searchAnnouncementSettings.timeTo)
-        _announcements.value = announcementList.filter {
+        visibleAnnouncementList.clear()
+        visibleAnnouncementList.addAll(commonAnnouncementList.filter {
             it.time in timeFromMilli until timeToMilli
-        }.toList()
+        }.toList())
+        _state.value = Announcements(visibleAnnouncementList.toList())
     }
 
     private fun parseDate(date: DateForAnnouncements): LocalDate {

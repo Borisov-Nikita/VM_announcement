@@ -10,10 +10,10 @@ import nik.borisov.vmannouncement.data.RepositoryImpl
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
 import nik.borisov.vmannouncement.domain.entities.MessageItem
 import nik.borisov.vmannouncement.domain.entities.TelegramBot
-import nik.borisov.vmannouncement.domain.usecases.DeleteAnnouncementUseCase
-import nik.borisov.vmannouncement.domain.usecases.GetAnnouncementsUseCase
-import nik.borisov.vmannouncement.domain.usecases.GetTelegramBotUseCase
-import nik.borisov.vmannouncement.domain.usecases.SendTelegramMessageUseCase
+import nik.borisov.vmannouncement.domain.usecases.*
+import nik.borisov.vmannouncement.presentation.viewmodels.states.AnnouncementsState
+import nik.borisov.vmannouncement.presentation.viewmodels.states.BotError
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Line
 import nik.borisov.vmannouncement.utils.TelegramBotHelper
 
 class SavedAnnouncementsViewModel(application: Application) : AndroidViewModel(application),
@@ -21,14 +21,15 @@ class SavedAnnouncementsViewModel(application: Application) : AndroidViewModel(a
 
     private val repository = RepositoryImpl(application)
     private val getAnnouncementsUseCase = GetAnnouncementsUseCase(repository)
+    private val downloadLineUseCase = DownloadLineUseCase(repository)
     private val deleteAnnouncementUseCase = DeleteAnnouncementUseCase(repository)
     private val sendTelegramMessageUseCase =
         SendTelegramMessageUseCase(repository)
     private val getTelegramBotUseCase = GetTelegramBotUseCase(repository)
 
-    private val _telegramBotError = MutableLiveData<Unit>()
-    val telegramBotError: LiveData<Unit>
-        get() = _telegramBotError
+    private val _state = MutableLiveData<AnnouncementsState>()
+    val state: LiveData<AnnouncementsState>
+        get() = _state
 
     private var telegramBot: TelegramBot? = null
 
@@ -38,6 +39,12 @@ class SavedAnnouncementsViewModel(application: Application) : AndroidViewModel(a
 
     fun getAnnouncements(announcementsReportId: Long): LiveData<List<AnnouncementItem>> {
         return getAnnouncementsUseCase.getAnnouncements(announcementsReportId)
+    }
+
+    fun getLine(firstTeam: String, secondTeam: String, time: Long) {
+        viewModelScope.launch {
+            _state.value = Line(downloadLineUseCase.downloadLine(firstTeam, secondTeam, time))
+        }
     }
 
     fun deleteAnnouncement(announcementId: Long) {
@@ -63,7 +70,7 @@ class SavedAnnouncementsViewModel(application: Application) : AndroidViewModel(a
                 )
             }
         } else {
-            _telegramBotError.value = Unit
+            _state.value = BotError
         }
     }
 
