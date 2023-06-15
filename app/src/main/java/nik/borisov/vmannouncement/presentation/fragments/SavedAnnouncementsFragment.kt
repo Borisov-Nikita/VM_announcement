@@ -11,20 +11,39 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentSavedAnnouncementsBinding
-import nik.borisov.vmannouncement.presentation.viewmodels.SavedAnnouncementsViewModel
+import nik.borisov.vmannouncement.databinding.LineTextBottomSheetBinding
+import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
+import nik.borisov.vmannouncement.presentation.viewmodels.SavedAnnouncementsViewModel
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Announcements
+import nik.borisov.vmannouncement.presentation.viewmodels.states.BotError
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Line
+import nik.borisov.vmannouncement.utils.DataResult
 
 class SavedAnnouncementsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[SavedAnnouncementsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[SavedAnnouncementsViewModel::class.java]
     }
 
     private var _binding: FragmentSavedAnnouncementsBinding? = null
     private val binding: FragmentSavedAnnouncementsBinding
         get() = _binding ?: throw NullPointerException("FragmentSavedAnnouncementsBinding is null")
+
+    private val bindingLineTextBottomSheetDialog by lazy {
+        LineTextBottomSheetBinding.inflate(LayoutInflater.from(context))
+    }
+
+    private val lineTextDialog by lazy {
+        setupLineTextDialog()
+    }
 
     private val adapter = AnnouncementsAdapter()
 
@@ -53,8 +72,33 @@ class SavedAnnouncementsFragment : Fragment() {
         viewModel.getAnnouncements(parseReportIdParam()).observe(viewLifecycleOwner) {
             adapter.submitList(it)
         }
-        viewModel.telegramBotError.observe(viewLifecycleOwner) {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        viewModel.state.observe(viewLifecycleOwner) {
+            when (it) {
+                is Announcements -> {}
+                is Line -> {
+                    when (it.line) {
+                        is DataResult.Success -> {
+                            if (!it.line.data.isNullOrBlank()) {
+                                bindingLineTextBottomSheetDialog.lineTextView.text = it.line.data
+                                lineTextDialog.show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    getString(R.string.line_not_found),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        is DataResult.Error -> {
+                            Toast.makeText(context, it.line.message, Toast.LENGTH_SHORT).show()
+                        }
+                        is DataResult.Loading -> {}
+                    }
+                }
+                is BotError -> {
+                    Toast.makeText(context, getString(R.string.bot_error), Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
@@ -66,6 +110,7 @@ class SavedAnnouncementsFragment : Fragment() {
             LinearLayoutManager.VERTICAL,
             false
         )
+        adapter.onAnnouncementClickListener = onAnnouncementItemClick()
         setupAnnouncementItemSwipeListener(recyclerView)
     }
 
@@ -79,10 +124,9 @@ class SavedAnnouncementsFragment : Fragment() {
                     viewModel.sendAnnouncementsReport(adapter.currentList)
                     Toast.makeText(
                         requireContext(),
-                        "Announcements report message sent.",
+                        getString(R.string.message_sent),
                         Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
                     true
                 }
                 else -> false
@@ -110,6 +154,11 @@ class SavedAnnouncementsFragment : Fragment() {
         }).attachToRecyclerView(recyclerView)
     }
 
+    private fun onAnnouncementItemClick(): (AnnouncementItem) -> Unit = {
+        viewModel.getLine(it.firstTeam, it.secondTeam, it.time)
+        bindingLineTextBottomSheetDialog.announcementTextView.text = it.announcementText
+    }
+
     private fun parseReportIdParam(): Long {
         val arguments = requireArguments()
         if (!arguments.containsKey(ARG_REPORT_ID)) {
@@ -118,13 +167,19 @@ class SavedAnnouncementsFragment : Fragment() {
         return arguments.getLong(ARG_REPORT_ID)
     }
 
+    private fun setupLineTextDialog(): BottomSheetDialog {
+        val lineTextDialog = BottomSheetDialog(requireContext())
+        lineTextDialog.setContentView(bindingLineTextBottomSheetDialog.root)
+        return lineTextDialog
+    }
+
     private fun finishFragment() {
         activity?.supportFragmentManager?.popBackStack()
     }
 
     companion object {
 
-        private const val ARG_REPORT_ID = "arf_report_id"
+        private const val ARG_REPORT_ID = "arg_report_id"
 
         fun newInstance(announcementsReportId: Long) =
             SavedAnnouncementsFragment().apply {

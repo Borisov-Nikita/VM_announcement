@@ -1,4 +1,4 @@
-package nik.borisov.vmannouncement.presentation
+package nik.borisov.vmannouncement.utils
 
 enum class DateForAnnouncements {
     TODAY,

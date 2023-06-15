@@ -17,7 +17,7 @@ interface Repository {
 
     suspend fun addAnnouncementsReport(report: AnnouncementsReportItem): Long
 
-    suspend fun deleteAnnouncementReport(reportId: Long)
+    suspend fun deleteAnnouncementsReport(reportId: Long)
 
     fun getAnnouncements(reportId: Long): LiveData<List<AnnouncementItem>>
 

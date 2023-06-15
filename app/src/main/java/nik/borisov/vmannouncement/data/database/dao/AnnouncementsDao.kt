@@ -25,7 +25,7 @@ interface AnnouncementsDao {
     fun getAnnouncements(reportId: Long): LiveData<List<AnnouncementItemDbModel>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addAnnouncementItem(announcement: AnnouncementItemDbModel)
+    suspend fun addAnnouncement(announcement: AnnouncementItemDbModel)
 
     @Query("DELETE FROM announcements WHERE id =:announcementId")
     suspend fun deleteAnnouncement(announcementId: Long)

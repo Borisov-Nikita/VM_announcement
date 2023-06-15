@@ -7,13 +7,21 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentTelegramBotSettingsBinding
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.viewmodels.TelegramBotSettingsViewModel
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Bot
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Error
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Finish
 
 class TelegramBotSettingsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[TelegramBotSettingsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[TelegramBotSettingsViewModel::class.java]
     }
 
     private var _binding: FragmentTelegramBotSettingsBinding? = null
@@ -41,15 +49,23 @@ class TelegramBotSettingsFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.bot.observe(viewLifecycleOwner) {
-            binding.botTokenEditText.setText(it.token)
-            binding.chatIdEditText.setText(it.chatId)
-        }
-        viewModel.error.observe(viewLifecycleOwner) {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-        }
-        viewModel.shouldCloseScreen.observe(viewLifecycleOwner) {
-            finishFragment()
+        viewModel.state.observe(viewLifecycleOwner) {
+            when (it) {
+                is Bot -> {
+                    binding.botTokenEditText.setText(it.bot.token)
+                    binding.chatIdEditText.setText(it.bot.chatId)
+                }
+                is Error -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "${getString(R.string.bot_invalid)}\n${it.error}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                is Finish -> {
+                    finishFragment()
+                }
+            }
         }
     }
 

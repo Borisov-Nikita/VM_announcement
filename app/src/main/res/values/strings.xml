@@ -6,8 +6,6 @@
     <string name="menu_item_search">Search</string>
     <string name="menu_item_saved">Saved</string>
     <string name="menu_item_settings">Settings</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="display_settings">Display settings</string>
     <string name="time_to_display">Time to display</string>
     <string name="show">Show</string>
@@ -18,4 +16,9 @@
     <string name="bot_token">Bot token</string>
     <string name="chat_id">Chat id</string>
     <string name="save_telegram_bot">Save telegram bot</string>
+    <string name="message_sent">Announcements report message sent.</string>
+    <string name="line_not_found">Line not found.</string>
+    <string name="report_saved">Announcements report saved.</string>
+    <string name="bot_error">Telegram bot is not configured.</string>
+    <string name="bot_invalid">Invalid configured input:</string>
 </resources>

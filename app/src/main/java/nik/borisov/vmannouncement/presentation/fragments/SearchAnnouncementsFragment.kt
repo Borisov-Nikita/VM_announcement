@@ -16,16 +16,23 @@ import nik.borisov.vmannouncement.databinding.DisplaySettingsBottomSheetBinding
 import nik.borisov.vmannouncement.databinding.FragmentSearchAnnouncementsBinding
 import nik.borisov.vmannouncement.databinding.LineTextBottomSheetBinding
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
-import nik.borisov.vmannouncement.presentation.DateForAnnouncements
-import nik.borisov.vmannouncement.presentation.SearchAnnouncementSettings
-import nik.borisov.vmannouncement.presentation.viewmodels.SearchAnnouncementsViewModel
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
+import nik.borisov.vmannouncement.presentation.viewmodels.SearchAnnouncementsViewModel
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Announcements
+import nik.borisov.vmannouncement.presentation.viewmodels.states.BotError
+import nik.borisov.vmannouncement.presentation.viewmodels.states.Line
 import nik.borisov.vmannouncement.utils.DataResult
+import nik.borisov.vmannouncement.utils.DateForAnnouncements
+import nik.borisov.vmannouncement.utils.SearchAnnouncementSettings
 
 class SearchAnnouncementsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[SearchAnnouncementsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[SearchAnnouncementsViewModel::class.java]
     }
 
     private var _binding: FragmentSearchAnnouncementsBinding? = null
@@ -73,27 +80,35 @@ class SearchAnnouncementsFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.announcements.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-        }
-        viewModel.line.observe(viewLifecycleOwner) {
+        viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
-                is DataResult.Success -> {
-                    if (!it.data.isNullOrBlank()) {
-                        bindingLineTextBottomSheetDialog.lineTextView.text = it.data
-                        lineTextDialog.show()
-                    } else {
-                        Toast.makeText(context, "Line didn't found.", Toast.LENGTH_SHORT).show()
+                is Announcements -> {
+                    adapter.submitList(it.announcements)
+                }
+                is Line -> {
+                    when (it.line) {
+                        is DataResult.Success -> {
+                            if (!it.line.data.isNullOrBlank()) {
+                                bindingLineTextBottomSheetDialog.lineTextView.text = it.line.data
+                                lineTextDialog.show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    getString(R.string.line_not_found),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        is DataResult.Error -> {
+                            Toast.makeText(context, it.line.message, Toast.LENGTH_SHORT).show()
+                        }
+                        is DataResult.Loading -> {}
                     }
                 }
-                is DataResult.Error -> {
-                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                is BotError -> {
+                    Toast.makeText(context, getString(R.string.bot_error), Toast.LENGTH_LONG).show()
                 }
-                is DataResult.Loading -> {}
             }
-        }
-        viewModel.telegramBotError.observe(viewLifecycleOwner) {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -124,7 +139,7 @@ class SearchAnnouncementsFragment : Fragment() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val announcementItem = adapter.currentList[viewHolder.adapterPosition]
-                viewModel.deleteAnnouncementItem(announcementItem)
+                viewModel.deleteAnnouncement(announcementItem)
             }
         }).attachToRecyclerView(recyclerView)
     }
@@ -140,7 +155,7 @@ class SearchAnnouncementsFragment : Fragment() {
                     viewModel.saveAnnouncements()
                     Toast.makeText(
                         requireContext(),
-                        "Announcements report saved.",
+                        getString(R.string.report_saved),
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -150,10 +165,9 @@ class SearchAnnouncementsFragment : Fragment() {
                     viewModel.sendAnnouncementsReport()
                     Toast.makeText(
                         requireContext(),
-                        "Announcements report message sent.",
+                        getString(R.string.message_sent),
                         Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
                     true
                 }
                 else -> false
