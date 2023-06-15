@@ -5,10 +5,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".presentation.VmAnnouncementsApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_vm_announcements"
+        android:icon="@drawable/ic_vm_announcement_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.VMAnnouncement"

@@ -16,6 +16,7 @@ import nik.borisov.vmannouncement.databinding.DisplaySettingsBottomSheetBinding
 import nik.borisov.vmannouncement.databinding.FragmentSearchAnnouncementsBinding
 import nik.borisov.vmannouncement.databinding.LineTextBottomSheetBinding
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
 import nik.borisov.vmannouncement.presentation.viewmodels.SearchAnnouncementsViewModel
 import nik.borisov.vmannouncement.presentation.viewmodels.states.Announcements
@@ -28,7 +29,10 @@ import nik.borisov.vmannouncement.utils.SearchAnnouncementSettings
 class SearchAnnouncementsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[SearchAnnouncementsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[SearchAnnouncementsViewModel::class.java]
     }
 
     private var _binding: FragmentSearchAnnouncementsBinding? = null

@@ -1,12 +1,10 @@
 package nik.borisov.vmannouncement.presentation.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import nik.borisov.vmannouncement.data.RepositoryImpl
 import nik.borisov.vmannouncement.domain.entities.MessageItem
 import nik.borisov.vmannouncement.domain.entities.TelegramBot
 import nik.borisov.vmannouncement.domain.usecases.AddTelegramBotUseCase
@@ -17,14 +15,14 @@ import nik.borisov.vmannouncement.presentation.viewmodels.states.Error
 import nik.borisov.vmannouncement.presentation.viewmodels.states.Finish
 import nik.borisov.vmannouncement.presentation.viewmodels.states.TelegramBotSettingsState
 import nik.borisov.vmannouncement.utils.DataResult
+import javax.inject.Inject
 
 
-class TelegramBotSettingsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = RepositoryImpl(application)
-    private val getTelegramBotUseCase = GetTelegramBotUseCase(repository)
-    private val addTelegramBotUseCase = AddTelegramBotUseCase(repository)
-    private val sendTelegramMessageUseCase = SendTelegramMessageUseCase(repository)
+class TelegramBotSettingsViewModel @Inject constructor(
+    private val getTelegramBotUseCase: GetTelegramBotUseCase,
+    private val addTelegramBotUseCase: AddTelegramBotUseCase,
+    private val sendTelegramMessageUseCase: SendTelegramMessageUseCase
+) : ViewModel() {
 
     private val _state = MutableLiveData<TelegramBotSettingsState>()
     val state: LiveData<TelegramBotSettingsState>

@@ -1,8 +1,9 @@
 package nik.borisov.vmannouncement.domain.usecases
 
 import nik.borisov.vmannouncement.domain.repositories.Repository
+import javax.inject.Inject
 
-class DeleteAnnouncementsReportUseCase(
+class DeleteAnnouncementsReportUseCase @Inject constructor(
     private val repository: Repository
 ) {
 

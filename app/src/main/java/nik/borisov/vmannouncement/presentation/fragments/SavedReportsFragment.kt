@@ -11,13 +11,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentSavedReportsBinding
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.adapters.ReportsAdapter
 import nik.borisov.vmannouncement.presentation.viewmodels.SavedReportsViewModel
 
 class SavedReportsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[SavedReportsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[SavedReportsViewModel::class.java]
     }
 
     private var _binding: FragmentSavedReportsBinding? = null

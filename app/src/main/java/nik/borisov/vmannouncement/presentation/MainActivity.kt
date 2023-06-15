@@ -9,14 +9,24 @@ import nik.borisov.vmannouncement.databinding.ActivityMainBinding
 import nik.borisov.vmannouncement.presentation.fragments.SavedReportsFragment
 import nik.borisov.vmannouncement.presentation.fragments.SearchAnnouncementsFragment
 import nik.borisov.vmannouncement.presentation.fragments.SettingsFragment
+import nik.borisov.vmannouncement.presentation.viewmodels.ViewModelFactory
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy {
+        (application as VmAnnouncementsApp).component
+    }
 
     private val binding by lazy {
         ActivityMainBinding.inflate(LayoutInflater.from(this))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             showFragment(SearchAnnouncementsFragment.newInstance(), "Search")

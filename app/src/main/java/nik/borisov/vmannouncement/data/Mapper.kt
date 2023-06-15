@@ -10,8 +10,9 @@ import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
 import nik.borisov.vmannouncement.domain.entities.AnnouncementsReportItem
 import nik.borisov.vmannouncement.domain.entities.TelegramBot
 import nik.borisov.vmannouncement.utils.TimeConverter
+import javax.inject.Inject
 
-class Mapper : TimeConverter {
+class Mapper @Inject constructor() : TimeConverter {
 
     fun mapAnnouncementDtoToEntity(
         dto: AnnouncementDto
@@ -117,10 +118,15 @@ class Mapper : TimeConverter {
         teamNames: String
     ): String {
         return buildString {
-            append(convertTimeDateFromMillisToString(time, "dd MMM HH:mm"), "\n")
-            append(sport, ". ")
-            append(teamNames, "\n")
-            append(league)
+            append(
+                convertTimeDateFromMillisToString(time, "dd MMM HH:mm"),
+                "\n",
+                sport,
+                ". ",
+                teamNames,
+                "\n",
+                league
+            )
         }
     }
 }

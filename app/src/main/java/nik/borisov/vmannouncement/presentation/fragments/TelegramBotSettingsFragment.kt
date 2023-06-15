@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentTelegramBotSettingsBinding
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.viewmodels.TelegramBotSettingsViewModel
 import nik.borisov.vmannouncement.presentation.viewmodels.states.Bot
 import nik.borisov.vmannouncement.presentation.viewmodels.states.Error
@@ -17,7 +18,10 @@ import nik.borisov.vmannouncement.presentation.viewmodels.states.Finish
 class TelegramBotSettingsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[TelegramBotSettingsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[TelegramBotSettingsViewModel::class.java]
     }
 
     private var _binding: FragmentTelegramBotSettingsBinding? = null

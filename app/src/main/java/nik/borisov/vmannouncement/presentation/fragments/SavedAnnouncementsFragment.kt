@@ -16,6 +16,7 @@ import nik.borisov.vmannouncement.R
 import nik.borisov.vmannouncement.databinding.FragmentSavedAnnouncementsBinding
 import nik.borisov.vmannouncement.databinding.LineTextBottomSheetBinding
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
+import nik.borisov.vmannouncement.presentation.MainActivity
 import nik.borisov.vmannouncement.presentation.adapters.AnnouncementsAdapter
 import nik.borisov.vmannouncement.presentation.viewmodels.SavedAnnouncementsViewModel
 import nik.borisov.vmannouncement.presentation.viewmodels.states.Announcements
@@ -26,7 +27,10 @@ import nik.borisov.vmannouncement.utils.DataResult
 class SavedAnnouncementsFragment : Fragment() {
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[SavedAnnouncementsViewModel::class.java]
+        ViewModelProvider(
+            this,
+            (activity as MainActivity).viewModelFactory
+        )[SavedAnnouncementsViewModel::class.java]
     }
 
     private var _binding: FragmentSavedAnnouncementsBinding? = null

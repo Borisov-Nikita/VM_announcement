@@ -1,10 +1,36 @@
 package nik.borisov.vmannouncement.utils
 
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
+import nik.borisov.vmannouncement.domain.entities.MessageItem
+import nik.borisov.vmannouncement.domain.entities.TelegramBot
 
 interface TelegramBotHelper : TimeConverter {
 
-    fun parseMessage(announcements: List<AnnouncementItem>): String {
+    suspend fun sendMessages(
+        bot: TelegramBot,
+        announcementsList: List<AnnouncementItem>,
+        useCase: suspend (MessageItem) -> Unit
+    ) {
+        if (announcementsList.size > 30) {
+            val subLists = announcementsList.chunked(30)
+            for (list in subLists) {
+                sendMessage(bot, parseMessage(list), useCase)
+            }
+        } else {
+            sendMessage(bot, parseMessage(announcementsList), useCase)
+        }
+        sendMessage(bot, parseShortAnnouncementsMessage(announcementsList), useCase)
+    }
+
+    private suspend fun sendMessage(
+        bot: TelegramBot,
+        message: String,
+        useCase: suspend (MessageItem) -> Unit
+    ) {
+        useCase(MessageItem(bot = bot, messageText = message))
+    }
+
+    private fun parseMessage(announcements: List<AnnouncementItem>): String {
         return buildString {
             for (announcement in announcements) {
                 append(announcement.announcementText, "\n\n")
@@ -12,7 +38,7 @@ interface TelegramBotHelper : TimeConverter {
         }
     }
 
-    fun parseShortAnnouncementsMessage(announcements: List<AnnouncementItem>): String {
+    private fun parseShortAnnouncementsMessage(announcements: List<AnnouncementItem>): String {
         val counterMap = mutableMapOf<String, MutableMap<String, Int>>()
         for (announcement in announcements) {
             val time = convertTimeDateFromMillisToString(announcement.time, "dd MMM HH:mm")
@@ -35,7 +61,14 @@ interface TelegramBotHelper : TimeConverter {
             for (entry in counterMap) {
                 append(entry.key, ":\n")
                 for (secondEntry in entry.value) {
-                    append("${secondEntry.key} - ${secondEntry.value}", "\n")
+                    append(
+                        "      ",
+                        secondEntry.key,
+                        " - ",
+                        secondEntry.value,
+                        "\n"
+                    )
+
                 }
                 append("\n")
             }

@@ -2,8 +2,9 @@ package nik.borisov.vmannouncement.domain.usecases
 
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
 import nik.borisov.vmannouncement.domain.repositories.Repository
+import javax.inject.Inject
 
-class AddAnnouncementsUseCase(
+class AddAnnouncementsUseCase @Inject constructor(
     private val repository: Repository
 ) {
 

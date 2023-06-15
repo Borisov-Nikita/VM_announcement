@@ -1,12 +1,10 @@
 package nik.borisov.vmannouncement.presentation.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import nik.borisov.vmannouncement.data.RepositoryImpl
 import nik.borisov.vmannouncement.domain.entities.AnnouncementItem
 import nik.borisov.vmannouncement.domain.entities.AnnouncementsReportItem
 import nik.borisov.vmannouncement.domain.entities.MessageItem
@@ -18,18 +16,16 @@ import nik.borisov.vmannouncement.presentation.viewmodels.states.BotError
 import nik.borisov.vmannouncement.presentation.viewmodels.states.Line
 import nik.borisov.vmannouncement.utils.*
 import java.time.*
+import javax.inject.Inject
 
-class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(application),
-    TelegramBotHelper, TimeConverter {
-
-    private val repository = RepositoryImpl(application)
-    private val downloadAnnouncementsUseCase = DownloadAnnouncementsUseCase(repository)
-    private val downloadLineUseCase = DownloadLineUseCase(repository)
-    private val addAnnouncementReportUseCase = AddAnnouncementsReportUseCase(repository)
-    private val addAnnouncementsUseCase = AddAnnouncementsUseCase(repository)
-    private val sendTelegramMessageUseCase =
-        SendTelegramMessageUseCase(repository)
-    private val getTelegramBotUseCase = GetTelegramBotUseCase(repository)
+class SearchAnnouncementsViewModel @Inject constructor(
+    private val downloadAnnouncementsUseCase: DownloadAnnouncementsUseCase,
+    private val downloadLineUseCase: DownloadLineUseCase,
+    private val addAnnouncementReportUseCase: AddAnnouncementsReportUseCase,
+    private val addAnnouncementsUseCase: AddAnnouncementsUseCase,
+    private val sendTelegramMessageUseCase: SendTelegramMessageUseCase,
+    private val getTelegramBotUseCase: GetTelegramBotUseCase
+) : ViewModel(), TelegramBotHelper, TimeConverter {
 
     private val _state = MutableLiveData<AnnouncementsState>()
     val state: LiveData<AnnouncementsState>
@@ -95,23 +91,20 @@ class SearchAnnouncementsViewModel(application: Application) : AndroidViewModel(
         if (telegramBot != null) {
             if (visibleAnnouncementList.isNotEmpty()) {
                 viewModelScope.launch {
-                    sendTelegramMessageUseCase.sendTelegramMessage(
-                        MessageItem(
-                            bot = telegramBot ?: return@launch,
-                            messageText = parseMessage(visibleAnnouncementList)
-                        )
-                    )
-                    sendTelegramMessageUseCase.sendTelegramMessage(
-                        MessageItem(
-                            bot = telegramBot ?: return@launch,
-                            messageText = parseShortAnnouncementsMessage(visibleAnnouncementList)
-                        )
+                    sendMessages(
+                        telegramBot ?: return@launch,
+                        visibleAnnouncementList,
+                        ::sendMessageWithUseCase
                     )
                 }
             }
         } else {
             _state.value = BotError
         }
+    }
+
+    private suspend fun sendMessageWithUseCase(messageItem: MessageItem) {
+        sendTelegramMessageUseCase.sendTelegramMessage(messageItem)
     }
 
     private fun getAnnouncements() {
